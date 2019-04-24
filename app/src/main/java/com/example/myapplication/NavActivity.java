@@ -138,6 +138,7 @@ public class NavActivity extends AppCompatActivity
                fragment = new MyDietScreen();
                break;
            case R.id.nav_steps:
+               fragment = new Steps();
                break;
            case R.id.nav_report:
                break;
