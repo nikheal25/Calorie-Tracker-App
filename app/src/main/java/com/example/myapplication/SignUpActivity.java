@@ -6,17 +6,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+
+import com.basgeekball.awesomevalidation.AwesomeValidation;
+import com.basgeekball.awesomevalidation.ValidationStyle;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 public class SignUpActivity extends AppCompatActivity {
-    private EditText dateText, heightText, weightText;
+    private EditText dateText, heightText, weightText, firstnameText, lastnameText, emailText, addressText, postcodeText, usenameText, passwordText;
     private Spinner spinner;
+    private Button submitButton;
+    private AwesomeValidation awesomeValidation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +32,18 @@ public class SignUpActivity extends AppCompatActivity {
 
         this.setTitle("Sign Up");
 
+        //edittext field
+        firstnameText = findViewById(R.id.firstNameEditText);
+        lastnameText = findViewById(R.id.surnameEditText);
+        emailText = findViewById(R.id.emailEditText);
         dateText = findViewById(R.id.dateEditText);
         dateText.setInputType(InputType.TYPE_NULL);
+        heightText = findViewById(R.id.heightText);
+        weightText = findViewById(R.id.weightText);
+        addressText = findViewById(R.id.addressText);
+        postcodeText = findViewById(R.id.postcodeEditText);
+        usenameText = findViewById(R.id.usernameEditText);
+        passwordText = findViewById(R.id.passwordText);
 
         dateText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,11 +63,44 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
 
-        heightText = findViewById(R.id.heightText);
+
 
         //Spinner
         displaySpinner();
 
+        //button
+        submitButton = (Button) findViewById(R.id.SignUpFinish);
+
+        awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
+
+        awesomeValidation.addValidation(this, R.id.firstNameEditText, "[a-zA-Z]+", R.string.name_error);
+        awesomeValidation.addValidation(this, R.id.firstNameEditText, "^\\w{0,20}$", R.string.name_length_error);
+        awesomeValidation.addValidation(this, R.id.surnameEditText, "[a-zA-Z\\\\s]+", R.string.name_error);
+
+        awesomeValidation.addValidation(this, R.id.emailEditText, "^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$", R.string.email_error);
+
+        awesomeValidation.addValidation(this, R.id.heightText, "^[0-9]+$", R.string.number_error);
+        awesomeValidation.addValidation(this, R.id.weightText, "^[0-9]+$", R.string.number_error);
+
+        awesomeValidation.addValidation(this, R.id.addressText, "[a-zA-Z0-9]+", R.string.address_error);
+
+        awesomeValidation.addValidation(this, R.id.postcodeEditText, "^[0-9]{4}$", R.string.postcode_error);
+
+        awesomeValidation.addValidation(this, R.id.usernameEditText, "[a-zA-Z0-9]+", R.string.username_error);
+        awesomeValidation.addValidation(this, R.id.passwordText, "[a-zA-Z0-9]+", R.string.password_error);
+
+
+
+        submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if( awesomeValidation.validate()){
+                    addData();
+                }else{
+                    addData();
+                }
+            }
+        });
 
     }
 
@@ -66,6 +116,10 @@ public class SignUpActivity extends AppCompatActivity {
         ArrayAdapter<Integer> arrayAdapter = new ArrayAdapter<Integer>(this, android.R.layout.simple_spinner_item,levelOfActivity);
 
         spinner.setAdapter(arrayAdapter);
+    }
+
+    private void addData(){
+        //Code to commit to the database
     }
 
 }

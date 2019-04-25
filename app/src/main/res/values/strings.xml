@@ -11,4 +11,13 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <string name="name_error">Invalid Name</string>
+    <string name="name_length_error">name must less than 20 characters</string>
+    <string name="email_error">Invalid Email</string>
+    <string name="number_error">Must be a number</string>
+    <string name="postcode_error">Postcode must be 4 digit number</string>
+    <string name="address_error">Invalid addressr</string>
+    <string name="username_error">Username addressr</string>
+    <string name="password_error">Password addressr</string>
+
 </resources>
