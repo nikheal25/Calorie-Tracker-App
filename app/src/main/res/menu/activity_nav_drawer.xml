@@ -24,6 +24,10 @@
             android:id="@+id/nav_map"
             android:icon="@drawable/ic_menu_manage"
             android:title="Map" />
+        <item
+            android:id="@+id/nav_food"
+            android:icon="@drawable/fitness"
+            android:title="Food" />
     </group>
 
     <item android:title="Communicate">

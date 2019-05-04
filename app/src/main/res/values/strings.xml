@@ -20,4 +20,16 @@
     <string name="username_error">Username addressr</string>
     <string name="password_error">Password addressr</string>
 
+    <string-array name="food_category">
+        <item>Drink</item>
+        <item>Meal</item>
+        <item>Meat</item>
+        <item>Snack</item>
+        <item>Bread</item>
+        <item>Cake</item>
+        <item>Fruit</item>
+        <item>Vegies</item>
+        <item>Other</item>
+    </string-array>
+
 </resources>

@@ -15,7 +15,7 @@ public class Dashboard extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
-        setTitle("Calorie Tracker");
+        setTitle("Calorie");
         String name = "User";
         TextView userName = findViewById(R.id.userName);
         try {

@@ -2,6 +2,8 @@ package com.example.myapplication;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -14,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,6 +28,8 @@ import java.util.Calendar;
 public class NavActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, Steps.OnFragmentInteractionListener {
 
+    //Shared preference
+    SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,9 +78,51 @@ public class NavActivity extends AppCompatActivity
         String date = dateFormat.format(Calendar.getInstance().getTime());
 
         SimpleDateFormat timeFormat =  new SimpleDateFormat("HH:mm:ss");
-        String time = dateFormat.format(Calendar.getInstance().getTime());
+        final String time = timeFormat.format(Calendar.getInstance().getTime());
 
         displayDateTime(date, time);
+
+        //reading the shared preferences
+        sharedPreferences = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+        int goalOfTheDay = getGoalOfTheDay(date.toString());
+        displayGoalOfTheDay(goalOfTheDay);
+
+        //update the goal
+        Button updateGoal = (Button) findViewById(R.id.updateGoal);
+        updateGoal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TextView timeTextView = (TextView) findViewById(R.id.dailyGoalTextField);
+                String tempGoal = timeTextView.getText().toString();
+                try{
+                    int goal = Integer.parseInt(tempGoal);
+                    if(goal > 0){
+                        updateGoalOfTheDay(goal);
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+
+
+    private void updateGoalOfTheDay(int goal){
+        SimpleDateFormat dateFormat =  new SimpleDateFormat("dd/MM/yyyy");
+        String date = dateFormat.format(Calendar.getInstance().getTime());
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(date, goal);
+        editor.apply();
+    }
+
+    private int getGoalOfTheDay(String date){
+        return sharedPreferences.getInt(date, 0);
+    }
+
+    private void displayGoalOfTheDay(int goal){
+        TextView timeTextView = (TextView) findViewById(R.id.dailyGoalTextField);
+        timeTextView.setText(Integer.toString(goal));
     }
 
     private void displayDateTime(String date, String time){
@@ -140,9 +187,8 @@ public class NavActivity extends AppCompatActivity
            case R.id.nav_steps:
                fragment = new Steps();
                break;
-           case R.id.nav_report:
-               break;
-           case R.id.nav_tracker:
+           case R.id.nav_food:
+               fragment = new FoodList();
                break;
        }
 //      if(fragment != null){
