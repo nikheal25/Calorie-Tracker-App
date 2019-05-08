@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginTop="108dp"
+        android:layout_marginTop="88dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:ems="10"
@@ -77,6 +77,84 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/newFoodItemName"
-        app:layout_constraintVertical_bias="0.049" />
+        app:layout_constraintVertical_bias="0.021" />
+
+    <TextView
+        android:id="@+id/textViewFoodItemServing"
+        android:layout_width="130dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginRight="44dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFoodItemName" />
+
+    <TextView
+        android:id="@+id/textViewFooditemCalories"
+        android:layout_width="130dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/textViewFoodItemServing"
+        app:layout_constraintHorizontal_bias="0.593"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFoodItemNo2" />
+
+    <TextView
+        android:id="@+id/textViewFoodItemAmount"
+        android:layout_width="130dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/textViewFoodItemFat"
+        app:layout_constraintHorizontal_bias="0.593"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFooditemCalories"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/textViewFoodItemFat"
+        android:layout_width="130dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginRight="44dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFoodItemServing"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/textViewFoodItemNo2"
+        android:layout_width="130dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/textViewFoodItemName"
+        app:layout_constraintHorizontal_bias="0.595"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonNewFoodItemSearch" />
+
+    <TextView
+        android:id="@+id/textViewFoodItemName"
+        android:layout_width="130dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="44dp"
+        android:layout_marginRight="44dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonNewFoodItemSearch" />
 
 </android.support.constraint.ConstraintLayout>
