@@ -48,6 +48,7 @@ public class FoodList extends Fragment {
     private OnFragmentInteractionListener mListener;
     ArrayList<Food> foods;
     ArrayList<String> foodItems;
+    Spinner subSpinner, spinner;
 
 
 
@@ -65,17 +66,13 @@ public class FoodList extends Fragment {
         view = inflater.inflate(R.layout.fragment_food_list, container, false);
         view.setBackgroundColor(Color.WHITE);
 
-        final Spinner subSpinner, spinner;
         spinner = (Spinner) view.findViewById(R.id.foodCategory1);
-        subSpinner = (Spinner) view.findViewById(R.id.specificFoodItems); //TODO not working
+        subSpinner = (Spinner) view.findViewById(R.id.spinner2); //TODO not working
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.food_category, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        adapter.notifyDataSetChanged();
         spinner.setAdapter(adapter);
 
-
-        //Call to the web service
         try {
             FoodTableQuery foodTableQuery = new FoodTableQuery();
             foods = new ArrayList<Food>();
@@ -88,12 +85,14 @@ public class FoodList extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedCategory = parent.getSelectedItem().toString();
-                selectCategory(selectedCategory);
-                ArrayAdapter<String> subArrayAdapter = new ArrayAdapter<String>( view.getContext(), android.R.layout.simple_spinner_item, foodItems);
+
+                String[] specificFoodItems = returnSpecificCategories(selectedCategory);
+                ArrayAdapter<String> subArrayAdapter = new ArrayAdapter<String>( view.getContext(), android.R.layout.simple_spinner_item, specificFoodItems);
 
                 subArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 subArrayAdapter.notifyDataSetChanged();
                 subSpinner.setAdapter(subArrayAdapter);
+
             }
 
             @Override
@@ -104,7 +103,7 @@ public class FoodList extends Fragment {
         return view;
     }
 
-    private void selectCategory(String category){
+    private String[] returnSpecificCategories(String category){
         foodItems = new ArrayList<String>();
 
 
@@ -121,8 +120,10 @@ public class FoodList extends Fragment {
                     foodItems.add(food.getFoodName());
             }
         }
-
+        String[] temp = foodItems.toArray(new String[0]);
+        return temp;
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
