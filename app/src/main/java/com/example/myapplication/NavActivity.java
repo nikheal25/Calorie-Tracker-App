@@ -28,6 +28,12 @@ import java.util.Calendar;
 public class NavActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, Steps.OnFragmentInteractionListener {
 
+    private String userId;
+
+    public String getUserId() {
+        return userId;
+    }
+
     //Shared preference
     SharedPreferences sharedPreferences;
     @Override
@@ -63,6 +69,7 @@ public class NavActivity extends AppCompatActivity
             Bundle bundle = getIntent().getExtras();
 
             name = bundle.get("UserName").toString();
+            userId = bundle.get("UserId").toString();
 
         }catch (Exception e){
             e.printStackTrace();

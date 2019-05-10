@@ -39,11 +39,12 @@ tools:context=".MainActivity">
     <lecho.lib.hellocharts.view.PieChartView
         android:id="@+id/chart"
         android:layout_width="match_parent"
-        android:layout_height="557dp"
-        android:layout_marginTop="68dp"
+        android:layout_height="492dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/datePicker1"
+        app:layout_constraintVertical_bias="0.111"
         tools:layout_editor_absoluteX="0dp" />
 </android.support.constraint.ConstraintLayout>
 
