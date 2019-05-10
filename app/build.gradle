@@ -33,4 +33,10 @@ dependencies {
     annotationProcessor 'android.arch.persistence.room:compiler:1.1.1'
     //room
 
+    //pie chart
+
+    implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
+
+
+
 }

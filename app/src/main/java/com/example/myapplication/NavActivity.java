@@ -190,14 +190,11 @@ public class NavActivity extends AppCompatActivity
            case R.id.nav_food:
                fragment = new FoodList();
                break;
+           case R.id.nav_report:
+               fragment = new ReportScreen();
+               break;
        }
-//      if(fragment != null){
-//           FrameLayout frameLayout = (FrameLayout) findViewById(R.id.frame_layout);
-//           frameLayout.removeAllViews();
-//           FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-//           fragmentTransaction.replace(R.id.frame_layout, fragment);
-//           fragmentTransaction.commit();
-//       }
+
         if(fragment != null) {
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.frame_layout,
