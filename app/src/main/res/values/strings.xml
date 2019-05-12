@@ -19,6 +19,7 @@
     <string name="address_error">Invalid addressr</string>
     <string name="username_error">Username addressr</string>
     <string name="password_error">Password addressr</string>
+    <string name="date_invalid">start date must come before the end date</string>
 
     <string-array name="food_category">
         <item>Drink</item>

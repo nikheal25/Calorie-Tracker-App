@@ -12,11 +12,16 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Toast;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
@@ -27,8 +32,10 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import lecho.lib.hellocharts.model.PieChartData;
 import lecho.lib.hellocharts.model.SliceValue;
@@ -45,17 +52,77 @@ import lecho.lib.hellocharts.view.PieChartView;
  */
 public class ReportScreen extends Fragment {
     private View view;
-    EditText datePicker;
-    String dateSelected;
+    EditText datePicker,chartDate1, chartDate2;
+    String dateSelected, barDate1, barDate2;
     PieChartView pieChartView;
     List<SliceValue> pieData;
     PieChartData pieChartData;
     int userid;
+    BarChart chart;
+    Button plotChartButton;
+
+
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
     }
+
+    private int compareDates(String date1, String date2){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+        Date dateFirst, dateSecond;
+        try{
+             dateFirst = dateFormat.parse(date1);
+             dateSecond = dateFormat.parse(date2);
+        }catch (Exception e){
+            e.printStackTrace();
+            return -1;
+        }
+
+        return (int) TimeUnit.DAYS.convert(dateSecond.getTime() - dateFirst.getTime(), TimeUnit.MILLISECONDS);
+    }
+
+    private void selectDate1(){
+        final Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int month = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+
+        DatePickerDialog picker = new DatePickerDialog(view.getContext(), new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+                calendar.set(year, month, dayOfMonth);
+                barDate1 = dateFormat.format(calendar.getTime());
+                chartDate1.setText(barDate1);
+
+            }
+        }, year, month, day);
+        picker.show();
+    }
+
+    private void selectDate2(){
+        final Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int month = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+
+        DatePickerDialog picker = new DatePickerDialog(view.getContext(), new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+                calendar.set(year, month, dayOfMonth);
+                barDate2 = dateFormat.format(calendar.getTime());
+                chartDate2.setText(barDate2);
+
+            }
+        }, year, month, day);
+        picker.show();
+    }
+
+
 
     @Nullable
     @Override
@@ -68,6 +135,8 @@ public class ReportScreen extends Fragment {
 
         datePicker = view.findViewById(R.id.datePicker1);
         datePicker.setInputType(InputType.TYPE_NULL);
+        chart = (BarChart) view.findViewById(R.id.barchart);
+
         try {
             userid = Integer.parseInt(((NavActivity) getActivity()).getUserId());
         }catch (Exception e){
@@ -77,12 +146,88 @@ public class ReportScreen extends Fragment {
 
 
         pieChartView = view.findViewById(R.id.chart);
+        //BarData data = new BarData(getXAxisValues(), getDataSet());
+        chartDate1 = view.findViewById(R.id.dates);
+        chartDate2 = view.findViewById(R.id.dates2);
+
+        chartDate1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectDate1();
+            }
+        });
+
+        chartDate2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectDate2();
+            }
+        });
+
+        plotChartButton = (Button) view.findViewById(R.id.button3);
+
+        plotChartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int totalDays = 0;
+                if(barDate1!= null && barDate2 != null)
+                    totalDays = compareDates(barDate1, barDate2);
+                else{
+                    Toast.makeText(getActivity(), "Please make sure both dates are filled",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if (totalDays < 0){
+                    Toast.makeText(getActivity(), R.string.date_invalid,
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                int groupCount = 6;
+
+                ArrayList xVals = new ArrayList();
+
+                xVals.add("Jan");
+                xVals.add("Feb");
+                xVals.add("Mar");
+                xVals.add("Apr");
+                xVals.add("May");
+                xVals.add("Jun");
+
+                ArrayList yVals1 = new ArrayList();
+                ArrayList yVals2 = new ArrayList();
+
+                yVals1.add(new BarEntry(1, (float) 1));
+                yVals2.add(new BarEntry(1, (float) 2));
+                yVals1.add(new BarEntry(1, (float) 3));
+                yVals2.add(new BarEntry(2, (float) 4));
+                yVals1.add(new BarEntry(2, (float) 5));
+                yVals2.add(new BarEntry(2, (float) 6));
+
+
+                BarDataSet set1, set2;
+                set1 = new BarDataSet(yVals1, "A");
+                set1.setColor(Color.RED);
+                set2 = new BarDataSet(yVals2, "B");
+                set2.setColor(Color.BLUE);
+                BarData data = new BarData(set1, set2);
+                data.setValueFormatter(new LargeValueFormatter());
+                chart.setData(data);
+                //  chart.getBarData().setBarWidth(barWidth);
+                chart.getXAxis().setAxisMinimum(0);
+                //    chart.getXAxis().setAxisMaximum(0 + chart.getBarData().getGroupWidth(groupSpace, barSpace) * groupCount);
+                chart.groupBars(0, 0.4f, 0f);
+                chart.getData().setHighlightEnabled(false);
+                chart.invalidate();
+            }
+        });
+
 
         //TODO remove the lines below
         pieData = new ArrayList<>();
-        pieData.add(new SliceValue(15, Color.BLUE));
-        pieData.add(new SliceValue(25, Color.GRAY));
-        pieData.add(new SliceValue(10, Color.RED));
+        pieData.add(new SliceValue(30, Color.parseColor("#003f5c")).setLabel("Calories Consumed "));
+        pieData.add(new SliceValue(30, Color.parseColor("#7a5195")).setLabel("Calories Burned "));
+        pieData.add(new SliceValue(30, Color.parseColor("#ffa600")).setLabel("Remaining Calories "));
 
 
         pieChartData = new PieChartData(pieData);
