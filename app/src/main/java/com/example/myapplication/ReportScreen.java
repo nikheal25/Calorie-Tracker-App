@@ -18,9 +18,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.google.gson.JsonParser;
 
@@ -122,7 +126,71 @@ public class ReportScreen extends Fragment {
         picker.show();
     }
 
+    private void drawGraph(int totalDays){
+        float[] values = {0,0,0,0,0};
+        try {
+            values = new BarchartData().execute(Integer.toString(this.userid), this.barDate1, this.barDate2).get();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        ArrayList xVals = new ArrayList();
 
+        xVals.add(this.barDate1);
+        //TODO to confirm is it right?
+
+        ArrayList yVals1 = new ArrayList();
+        ArrayList yVals2 = new ArrayList();
+
+        float calConsumedPerDay = values[1]/(totalDays+1);
+        float calBurnedPerDay = (values[0] + values[2] + (values[3]*values[4]))/(totalDays+1);
+
+        yVals1.add(new BarEntry(1, calBurnedPerDay));
+        yVals2.add(new BarEntry(1, calConsumedPerDay));
+
+
+
+        BarDataSet set1, set2;
+        set1 = new BarDataSet(yVals1, "Calories Burned per day");
+        set1.setColor(Color.parseColor("#003f5c"));
+        set2 = new BarDataSet(yVals2, "Calories Consumed per day");
+        set2.setColor(Color.parseColor("#ffa600"));
+        BarData data = new BarData(set1, set2);
+        data.setValueFormatter(new LargeValueFormatter());
+        chart.setData(data);
+        //  chart.getBarData().setBarWidth(barWidth);
+        chart.getXAxis().setAxisMinimum(0);
+        //    chart.getXAxis().setAxisMaximum(0 + chart.getBarData().getGroupWidth(groupSpace, barSpace) * groupCount);
+        chart.groupBars(0, 0.1f, 1f);
+        chart.getData().setHighlightEnabled(false);
+        chart.invalidate();
+
+        Legend l = chart.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
+        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        l.setDrawInside(true);
+        l.setYOffset(20f);
+        l.setXOffset(0f);
+        l.setYEntrySpace(0f);
+        l.setTextSize(8f);
+
+        //X-axis
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setGranularity(1f);
+        xAxis.setGranularityEnabled(true);
+        xAxis.setCenterAxisLabels(true);
+        xAxis.setDrawGridLines(false);
+        xAxis.setAxisMaximum(6);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(xVals));
+//Y-axis
+        chart.getAxisRight().setEnabled(false);
+        YAxis leftAxis = chart.getAxisLeft();
+        leftAxis.setValueFormatter(new LargeValueFormatter());
+        leftAxis.setDrawGridLines(true);
+        leftAxis.setSpaceTop(35f);
+        leftAxis.setAxisMinimum(0f);
+    }
 
     @Nullable
     @Override
@@ -183,43 +251,13 @@ public class ReportScreen extends Fragment {
                     return;
                 }
 
-                int groupCount = 6;
-
-                ArrayList xVals = new ArrayList();
-
-                xVals.add("Jan");
-                xVals.add("Feb");
-                xVals.add("Mar");
-                xVals.add("Apr");
-                xVals.add("May");
-                xVals.add("Jun");
-
-                ArrayList yVals1 = new ArrayList();
-                ArrayList yVals2 = new ArrayList();
-
-                yVals1.add(new BarEntry(1, (float) 1));
-                yVals2.add(new BarEntry(1, (float) 2));
-                yVals1.add(new BarEntry(1, (float) 3));
-                yVals2.add(new BarEntry(2, (float) 4));
-                yVals1.add(new BarEntry(2, (float) 5));
-                yVals2.add(new BarEntry(2, (float) 6));
+               drawGraph(totalDays);
 
 
-                BarDataSet set1, set2;
-                set1 = new BarDataSet(yVals1, "A");
-                set1.setColor(Color.RED);
-                set2 = new BarDataSet(yVals2, "B");
-                set2.setColor(Color.BLUE);
-                BarData data = new BarData(set1, set2);
-                data.setValueFormatter(new LargeValueFormatter());
-                chart.setData(data);
-                //  chart.getBarData().setBarWidth(barWidth);
-                chart.getXAxis().setAxisMinimum(0);
-                //    chart.getXAxis().setAxisMaximum(0 + chart.getBarData().getGroupWidth(groupSpace, barSpace) * groupCount);
-                chart.groupBars(0, 0.4f, 0f);
-                chart.getData().setHighlightEnabled(false);
-                chart.invalidate();
+
             }
+
+
         });
 
 
@@ -354,4 +392,96 @@ class ReportQuery extends AsyncTask<String, Void, int[]> {
 
 }
 
+class BarchartData extends AsyncTask<String, Void, float[]> {
+    private static final String BASE_URL = "http://10.0.2.2:8080/assgn/webresources/restws.appuser/";
+    private static final String query1 = "calBurnedAtRest/";
+    private static final String query2 = "returnStepsTaken/";
+    private static final String query3 = "calculateCalBurnedPerStep/";
+
+    @Override
+    protected float[] doInBackground(String[] objects) {
+        String values= null;
+        URL url;
+        float[] returnArray = {0,0,0, 0 , 0 };
+
+        HttpURLConnection connection = null;
+
+        try {
+            url = new URL(BASE_URL + query1 + objects[0]);
+            connection =  (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            int responseCode = connection.getResponseCode();
+
+            if(!(responseCode!=200)){
+                InputStream inputStream = connection.getInputStream();
+                Scanner scanner = new Scanner(inputStream);
+
+                values = scanner.nextLine();
+                returnArray[0] = Float.parseFloat(values);
+            }
+            try{
+                url = new URL(BASE_URL + query2 + objects[0] +"/"+ objects[1] +"/"+objects[2] );
+                connection =  (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+
+                connection.setRequestProperty("Accept", "application/json");
+                connection.setRequestProperty("Content-Type", "application/json");
+                responseCode = connection.getResponseCode();
+
+                if(!(responseCode!=200)){
+                    InputStream inputStream = connection.getInputStream();
+                    Scanner scanner = new Scanner(inputStream);
+
+                    values = scanner.nextLine();
+                    JsonParser parser = new JsonParser();
+                    returnArray[1] = parser.parse(values).getAsJsonObject().get("Total Calories Consumed").getAsFloat();
+                    returnArray[2] = parser.parse(values).getAsJsonObject().get("Total Calories Burned").getAsFloat();
+                    returnArray[3] = parser.parse(values).getAsJsonObject().get("Total Steps Taken").getAsFloat();
+
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+            try{
+                url = new URL(BASE_URL + query3 + objects[0] );
+                connection =  (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+
+                connection.setRequestProperty("Accept", "application/json");
+                connection.setRequestProperty("Content-Type", "application/json");
+                responseCode = connection.getResponseCode();
+
+                if(!(responseCode!=200)){
+                    InputStream inputStream = connection.getInputStream();
+                    Scanner scanner = new Scanner(inputStream);
+
+                    values = scanner.nextLine();
+                    returnArray[4] =  Float.parseFloat(values);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+
+        } catch (MalformedURLException e) {
+
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(connection != null)
+                connection.disconnect();
+        }
+        return returnArray;
+    }
+
+}
 
