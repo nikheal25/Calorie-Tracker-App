@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
                     bundle.putString("UserName", jsonObject.getAsJsonObject().get("appuser").getAsJsonObject().getAsJsonPrimitive("userName").toString());
                     bundle.putString("UserId", jsonObject.getAsJsonObject().get("appuser").getAsJsonObject().getAsJsonPrimitive("userId").toString());
                     bundle.putString("UserDetails", jsonObject.toString());
+                    bundle.putString("address", jsonObject.getAsJsonObject().get("appuser").getAsJsonObject().getAsJsonPrimitive("userAddress").toString());
+                    bundle.putString("postcode", jsonObject.getAsJsonObject().get("appuser").getAsJsonObject().getAsJsonPrimitive("userPostcode").toString());
                     intentDash.putExtras(bundle);
                     startActivity(intentDash);
 

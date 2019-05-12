@@ -20,6 +20,7 @@
     <string name="username_error">Username addressr</string>
     <string name="password_error">Password addressr</string>
     <string name="date_invalid">start date must come before the end date</string>
+    <string name="google_maps_key">AIzaSyCz7hedipv9239FSw-iCRASvI2YJdQv6zY</string>
 
     <string-array name="food_category">
         <item>Drink</item>
@@ -32,5 +33,6 @@
         <item>Vegies</item>
         <item>Other</item>
     </string-array>
+    <string name="title_activity_maps">Map</string>
 
 </resources>

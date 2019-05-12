@@ -40,11 +40,10 @@ dependencies {
 
     //bar chart
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
-
     //pie chart
-
     implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
-
+    //google maps
+    implementation 'com.google.android.gms:play-services-maps:16.1.0'
 
 
 }

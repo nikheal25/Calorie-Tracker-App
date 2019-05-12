@@ -3,6 +3,7 @@ package com.example.myapplication;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -28,11 +29,13 @@ import java.util.Calendar;
 public class NavActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, Steps.OnFragmentInteractionListener {
 
-    private String userId;
+    private String userId, userAddress, userPostcode;
 
     public String getUserId() {
         return userId;
     }
+
+
 
     //Shared preference
     SharedPreferences sharedPreferences;
@@ -70,6 +73,8 @@ public class NavActivity extends AppCompatActivity
 
             name = bundle.get("UserName").toString();
             userId = bundle.get("UserId").toString();
+            userAddress = bundle.get("address").toString();
+            userPostcode = bundle.get("postcode").toString();
 
         }catch (Exception e){
             e.printStackTrace();
@@ -199,6 +204,14 @@ public class NavActivity extends AppCompatActivity
                break;
            case R.id.nav_report:
                fragment = new ReportScreen();
+               break;
+           case R.id.nav_map:
+               Intent intentDash = new Intent(NavActivity.this, MapsActivity.class);
+               Bundle bundle = new Bundle();
+               bundle.putString("address", this.userAddress);
+               bundle.putString("postcode", this.userPostcode);
+               intentDash.putExtras(bundle);
+               startActivity(intentDash);
                break;
        }
 
