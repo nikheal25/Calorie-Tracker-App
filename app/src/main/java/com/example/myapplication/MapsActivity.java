@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 
@@ -9,16 +10,28 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     String latitude, longitude;
     private LatLng homeLocation;
+    private ArrayList<LocationDetails> parks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +51,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
         getLocationFromAddress(completeAddress);
+        parks = null;
+
+        try{
+            parks = new ParkFinder().execute(this.homeLocation.latitude,this.homeLocation.longitude).get();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
     }
+
+
 
 
     public void getLocationFromAddress(String strAddress){
@@ -76,15 +98,128 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+       mMap = googleMap;
 
         mMap.addMarker(new MarkerOptions().position(homeLocation).title("Home"));
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(homeLocation, 15));
+        for (int i =0 ; i< parks.size() && i<10;i++) // We show maximum 10 parks
+            displayParks(parks.get(i));
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(homeLocation, 10));
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(homeLocation));
 
+
+
+    }
+
+    private void displayParks(LocationDetails park){
+        try {
+            mMap.addMarker(new MarkerOptions().position(new LatLng(park.getLatitude(), park.getLogitude())).title(park.getName()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }
 
+
+class ParkFinder extends AsyncTask<Object, Void, ArrayList<LocationDetails>> {
+    private static final String BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=";
+    private static final String keyAndType = "&radius=5000&type=park&key=AIzaSyCz7hedipv9239FSw-iCRASvI2YJdQv6zY";
+
+    @Override
+    protected ArrayList<LocationDetails> doInBackground(Object[] objects) {
+
+        URL credential;
+        String latitude = objects[0].toString();
+        String logitude = objects[1].toString();
+        String textResult = "";
+        HttpURLConnection connection = null;
+        ArrayList<LocationDetails> locations = new ArrayList<LocationDetails>();
+
+        try {
+            // credential = new URL("http://10.0.2.2:8080/assgn/webresources/restws.appuser/findByName/nik");
+            credential = new URL(BASE_URL +latitude +","+ logitude + keyAndType);
+            connection =  (HttpURLConnection) credential.openConnection();
+            connection.setRequestMethod("GET");
+
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            int responseCode = connection.getResponseCode();
+
+            if(responseCode!=200){
+
+            }else{
+                InputStream inputStream = connection.getInputStream();
+                Scanner scanner = new Scanner(inputStream);
+                while (scanner.hasNextLine()) {
+                    textResult += scanner.nextLine();
+                }
+                JsonParser parser = new JsonParser();
+
+                JsonArray jsonArray = parser.parse(textResult).getAsJsonObject().get("results").getAsJsonArray();
+                for(int i =0 ; i< jsonArray.size();i++){
+                    JsonObject jsonObject = (JsonObject) jsonArray.get(i);
+                    try {
+                    float latitude1 = jsonObject.get("geometry").getAsJsonObject().get("location").getAsJsonObject().get("lat").getAsFloat();
+                    float logitude1 = jsonObject.get("geometry").getAsJsonObject().get("location").getAsJsonObject().get("lng").getAsFloat();
+
+                        String name = jsonObject.get("name").getAsString();
+                        String openNow = "closed";
+                        if (jsonObject.get("opening_hours").getAsJsonObject().get("open_now").getAsString().equalsIgnoreCase("true"))
+                            openNow = "Open";
+                        locations.add(new LocationDetails(name, openNow, latitude1, logitude1));
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+        } catch (MalformedURLException e) {
+
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(connection != null)
+                connection.disconnect();
+        }
+        return locations;
+    }
+
+}
+
+class LocationDetails{
+
+
+    private String name, open;
+    private float latitude, logitude;
+
+    public LocationDetails(String name, String open, float latitude, float logitude) {
+        this.name = name;
+        this.open = open;
+        this.latitude = latitude;
+        this.logitude = logitude;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getOpen() {
+        return open;
+    }
+
+    public float getLatitude() {
+        return latitude;
+    }
+
+    public float getLogitude() {
+        return logitude;
+    }
+}
 
