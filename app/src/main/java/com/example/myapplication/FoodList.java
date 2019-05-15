@@ -87,7 +87,7 @@ public class FoodList extends Fragment implements View.OnClickListener{
             foods = new ArrayList<Food>();
             foods = foodTableQuery.execute().get();
         }catch (Exception e){
-
+    e.printStackTrace();
         }
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

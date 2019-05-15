@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.app.DatePickerDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
@@ -13,10 +14,20 @@ import android.widget.Spinner;
 
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
+import com.google.common.collect.ArrayTable;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Scanner;
 
 public class SignUpActivity extends AppCompatActivity {
     private EditText dateText, heightText, weightText, firstnameText, lastnameText, emailText, addressText, postcodeText, usenameText, passwordText;
@@ -95,9 +106,20 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if( awesomeValidation.validate()){
-                    addData();
+                    ArrayList<String> arrayList = new ArrayList<String>();
+                    arrayList.add(firstnameText.getText().toString());
+                    arrayList.add(lastnameText.getText().toString());
+                    arrayList.add(emailText.getText().toString());
+                    arrayList.add(dateText.getText().toString());
+                    arrayList.add(heightText.getText().toString());
+                    arrayList.add(weightText.getText().toString());
+                    arrayList.add(addressText.getText().toString());
+                    arrayList.add(postcodeText.getText().toString());
+                    arrayList.add(usenameText.getText().toString());
+                    arrayList.add(passwordText.getText().toString());
+                    addData(arrayList);
                 }else{
-                    addData();
+
                 }
             }
         });
@@ -118,8 +140,75 @@ public class SignUpActivity extends AppCompatActivity {
         spinner.setAdapter(arrayAdapter);
     }
 
-    private void addData(){
-        //Code to commit to the database
+    private void addData(ArrayList<String> list){
+
     }
 
+    class SignUpCall extends AsyncTask<ArrayList<String>, Void, String>{
+        private static final String BASE_URL = "http://10.0.2.2:8080/assgn/webresources/restws.credential/findByUserName/";
+
+        @Override
+        protected String doInBackground(ArrayList<String>... arrayLists) {
+            JsonObject returnValue= null;
+            URL credential;
+            ArrayList<Food> foods = null;
+            String textResult = "";
+            HttpURLConnection connection = null;
+
+            try {
+                // credential = new URL("http://10.0.2.2:8080/assgn/webresources/restws.appuser/findByName/nik");
+                credential = new URL(BASE_URL);
+                connection =  (HttpURLConnection) credential.openConnection();
+                connection.setRequestMethod("GET");
+
+
+
+                connection.setRequestProperty("Accept", "application/json");
+                connection.setRequestProperty("Content-Type", "application/json");
+
+                int responseCode = connection.getResponseCode();
+
+                if(responseCode!=200){
+                    returnValue = null;
+                }else{
+                    InputStream inputStream = connection.getInputStream();
+                    Scanner scanner = new Scanner(inputStream);
+                    while (scanner.hasNextLine()) {
+                        textResult += scanner.nextLine();
+                    }
+                    JsonParser parser = new JsonParser();
+                    JsonArray jsonArray = (JsonArray) parser.parse(textResult);
+
+                    foods = new ArrayList<Food>();
+
+                    if(jsonArray!=null){
+                        for(int i =0; i<jsonArray.size();i++){
+                            int foodId = jsonArray.get(i).getAsJsonObject().getAsJsonPrimitive("foodId").getAsInt();
+                            Food food = new Food();
+                            food.setFoodId(foodId);
+                            food.setFoodCategory(jsonArray.get(i).getAsJsonObject().getAsJsonPrimitive("foodCategory").getAsString());
+                            food.setFoodName(jsonArray.get(i).getAsJsonObject().getAsJsonPrimitive("foodName").getAsString());
+                            foods.add(food);
+                        }
+
+                    }
+
+
+                }
+
+            } catch (MalformedURLException e) {
+
+                e.printStackTrace();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                if(connection != null)
+                    connection.disconnect();
+            }
+            return null;
+        }
+    }
 }

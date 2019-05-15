@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,15 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import org.json.JSONObject;
+
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.spec.ECField;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,7 +47,9 @@ public class Steps extends Fragment implements View.OnClickListener {
     ListView stepsListView;
     SimpleAdapter myListAdapter;
     String[] colHEAD = new String[] {"Time","StepsTaken"};
-    List<HashMap<String, String>> listViewArray;;
+    List<HashMap<String, String>> listViewArray;
+    ArrayList<Stepstaken> listOfSteps;
+    private  int totalSteps = 0;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -51,7 +63,7 @@ public class Steps extends Fragment implements View.OnClickListener {
         String steps = stepField.getText().toString();
         InsertDatabase database = new InsertDatabase();
         database.execute(steps);
-        stepField.setText("Success");
+
     }
 
     @Nullable
@@ -59,11 +71,13 @@ public class Steps extends Fragment implements View.OnClickListener {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         stepsView = inflater.inflate(R.layout.fragment_steps,container,false);
         stepsView.setBackgroundColor(Color.WHITE);
-       //old location
+
         Button addSteps = (Button) stepsView.findViewById(R.id.stepsButton);
         final EditText stepField = stepsView.findViewById(R.id.stepsTakenView);
+        Button updateToDBButton = (Button) stepsView.findViewById(R.id.updateToDatabaseButton);
+
         stepsDB = Room.databaseBuilder(getActivity().getApplicationContext(), StepstakenDatabase.class, "steps_taken_database").fallbackToDestructiveMigration().build();
-        ArrayList<Stepstaken> listOfSteps = new ArrayList<>();
+        listOfSteps = new ArrayList<>();
         try {
            listOfSteps = new ReadDatabase().execute().get();
         }
@@ -71,16 +85,20 @@ public class Steps extends Fragment implements View.OnClickListener {
             e.printStackTrace();
         }
         stepsListView = stepsView.findViewById(R.id.mobile_list);
-
-         listViewArray = new ArrayList<HashMap<String, String>>();
-        HashMap<String,String> map = new HashMap<String,String>();
-        for (Stepstaken step:listOfSteps) {
-            map = new HashMap<String,String>();
-            map.put("Time", step.getDate());
-            map.put("StepsTaken", Integer.toString(step.getStepstaken()));
-            listViewArray.add(map);
-        }
-
+try {
+    totalSteps = 0;
+    listViewArray = new ArrayList<HashMap<String, String>>();
+    HashMap<String, String> map = new HashMap<String, String>();
+    for (Stepstaken step : listOfSteps) {
+        map = new HashMap<String, String>();
+        map.put("Time", step.getDate());
+        totalSteps += step.getStepstaken();
+        map.put("StepsTaken", Integer.toString(step.getStepstaken()));
+        listViewArray.add(map);
+    }
+}catch (Exception e){
+    e.printStackTrace();
+}
 
         int[] dataCell = new int[] {R.id.stepsTime,R.id.stepsCount};
         myListAdapter =  new SimpleAdapter(this.getActivity(),listViewArray,R.layout.list_view,colHEAD,dataCell);
@@ -93,6 +111,17 @@ public class Steps extends Fragment implements View.OnClickListener {
                     InsertDatabase database = new InsertDatabase();
                     database.execute(steps);
 
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        updateToDBButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                 new insertToDB().execute(totalSteps);
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -115,7 +144,6 @@ public class Steps extends Fragment implements View.OnClickListener {
             String dateInDB = dateFormat.format(date);
             try{
                 Stepstaken stepsTaken = new Stepstaken(dateInDB, stepsToAdd);
-                // StepstakenDatabase database = (StepstakenDatabase) objects[0];
 
                 returnVal = stepsDB.stepsTakenDao().insert(stepsTaken);
             }catch (Exception e){
@@ -131,6 +159,7 @@ public class Steps extends Fragment implements View.OnClickListener {
         protected ArrayList<Stepstaken> doInBackground(Void... params) {
             List<Stepstaken> steps=null;
             try {
+                if(stepsDB!=null)
                  steps= stepsDB.stepsTakenDao().getAll();
             }catch (Exception e){
                 e.printStackTrace();
@@ -140,6 +169,64 @@ public class Steps extends Fragment implements View.OnClickListener {
             return (ArrayList<Stepstaken>) steps;
         }
 
+    }
+
+    //todo
+    class insertToDB extends AsyncTask<Integer, Void, Void>{
+        private static final String BASE_URL =  "http://10.0.2.2:8080/assgn/webresources/restws.report/";
+        @Override
+        protected Void doInBackground(Integer... param) {
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            Date date = new Date();
+
+           // JsonObject jsonObject = new JsonObject();
+            JSONObject jsonObject= new JSONObject();
+           try {
+               jsonObject.put("REPORT_ID", "5");
+               jsonObject.put("USER_ID", "1");
+               jsonObject.put("REPORT_DATE", "2019-05-15");
+               jsonObject.put("TOTAL_CALORIES_CONSUMED", "11");
+               jsonObject.put("TOTAL_CALORIES_CONSUMED", "11");
+               jsonObject.put("TOTAL_CALORIES_BURN", "112");
+               jsonObject.put("TOTAL_STEPS", "122");
+               jsonObject.put("CALORIE_GOAL", "500");
+           }catch (Exception e){
+               e.printStackTrace();
+           }
+
+//            jsonObject.addProperty("REPORT_ID", "1");
+//            jsonObject.addProperty("USER_ID", "1");
+//            jsonObject.addProperty("REPORT_DATE", "2019-05-15");
+//            jsonObject.addProperty("TOTAL_CALORIES_CONSUMED","11");
+//            jsonObject.addProperty("TOTAL_CALORIES_CONSUMED","11");
+//            jsonObject.addProperty("TOTAL_CALORIES_BURN","112");
+//            jsonObject.addProperty("TOTAL_STEPS","122");
+//            jsonObject.addProperty("CALORIE_GOAL","500");
+            HttpURLConnection connection = null;
+            URL link = null;
+            try{
+                link = new URL(BASE_URL );
+                connection =  (HttpURLConnection) link.openConnection();
+                connection.setReadTimeout(10000);
+                connection.setConnectTimeout(15000);
+                connection.setRequestMethod("POST");
+                connection.setDoOutput(true);
+                connection.setFixedLengthStreamingMode(jsonObject.length());
+
+                connection.setRequestProperty("Content-Type", "application/json");
+
+
+                PrintWriter out= new PrintWriter(connection.getOutputStream());
+                out.print(jsonObject.toString());
+                out.close();
+               // Log.i("error",new Integer(connection.getResponseCode()).toString());
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                connection.disconnect();
+            }
+            return null;
+        }
     }
 }
 
