@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent intentDash;
                     intentDash = new Intent(MainActivity.this, NavActivity.class);
                     Bundle bundle = new Bundle();
-                    bundle.putString("UserName", jsonObject.getAsJsonObject().get("appuser").getAsJsonObject().getAsJsonPrimitive("userName").toString());
+                    bundle.putString("UserName", jsonObject.getAsJsonObject().get("appuser").getAsJsonObject().getAsJsonPrimitive("userName").getAsString());
                     bundle.putString("UserId", jsonObject.getAsJsonObject().get("appuser").getAsJsonObject().getAsJsonPrimitive("userId").toString());
                     bundle.putString("UserDetails", jsonObject.toString());
                     bundle.putString("address", jsonObject.getAsJsonObject().get("appuser").getAsJsonObject().getAsJsonPrimitive("userAddress").toString());

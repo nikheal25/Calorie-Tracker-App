@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.app.Fragment;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -15,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -49,8 +51,10 @@ public class FoodList extends Fragment implements View.OnClickListener{
     ArrayList<String> foodItems;
     Spinner subSpinner, spinner;
     private EditText searchFoodItemName;
-    private TextView foodId, foodName, foodCalories, foodUnit, foodAmount, foodfat;
+    private TextView foodId, foodName, foodCalories, foodUnit, foodAmount, foodfat, foodInfo;
     private Button searchButton;
+    private ImageView image;
+
 
 
 
@@ -77,6 +81,10 @@ public class FoodList extends Fragment implements View.OnClickListener{
         foodUnit = (TextView) view.findViewById(R.id.textViewFoodItemServing);
         foodAmount = (TextView) view.findViewById(R.id.textViewFoodItemAmount);
         foodfat = (TextView) view.findViewById(R.id.textViewFoodItemFat);
+
+        foodInfo = (TextView) view.findViewById(R.id.foodInfo);
+
+        image = (ImageView) view.findViewById(R.id.foodImageView);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.food_category, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -125,16 +133,23 @@ public class FoodList extends Fragment implements View.OnClickListener{
             NDBAccess ndbAccess =new NDBAccess();
             String foodItemName = searchFoodItemName.getText().toString();
             if(foodItemName.length()>0){
-                ArrayList<String> resultSet = ndbAccess.execute(foodItemName).get();
-                if (resultSet.size() != 6){
-                    throw new Exception();
+                try {
+                    ArrayList<String> resultSet = ndbAccess.execute(foodItemName).get();
+                    if (resultSet.size() != 6) {
+                        throw new Exception();
+                    }
+                    foodName.setText(resultSet.get(0));
+                    foodId.setText(resultSet.get(1));
+                    foodCalories.setText(resultSet.get(2));
+                    foodUnit.setText(resultSet.get(3));
+                    foodAmount.setText(resultSet.get(4));
+                    foodfat.setText(resultSet.get(5));
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
-                foodName.setText(resultSet.get(0));
-                foodId.setText(resultSet.get(1));
-                foodCalories.setText(resultSet.get(2));
-                foodUnit.setText(resultSet.get(3));
-                foodAmount.setText(resultSet.get(4));
-                foodfat.setText(resultSet.get(5));
+                ArrayList<Object> googleAPIDtata = new GoogleAPI().execute(foodItemName).get();
+                foodInfo.setText(googleAPIDtata.get(0).toString());
+                image.setImageBitmap((Bitmap) googleAPIDtata.get(1));
 
             }
         }catch (Exception e){

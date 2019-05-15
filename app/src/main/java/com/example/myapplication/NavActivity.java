@@ -46,14 +46,14 @@ public class NavActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -99,12 +99,29 @@ public class NavActivity extends AppCompatActivity
         int goalOfTheDay = getGoalOfTheDay(date.toString());
         displayGoalOfTheDay(goalOfTheDay);
 
+        //TODO to delete these lines
         //update the goal
-        Button updateGoal = (Button) findViewById(R.id.updateGoal);
-        updateGoal.setOnClickListener(new View.OnClickListener() {
+//        Button updateGoal = (Button) findViewById(R.id.updateGoal);
+//        updateGoal.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                TextView timeTextView = (TextView) findViewById(R.id.dailyGoalTextField);
+//                String tempGoal = timeTextView.getText().toString();
+//                try{
+//                    int goal = Integer.parseInt(tempGoal);
+//                    if(goal > 0){
+//                        updateGoalOfTheDay(goal);
+//                    }
+//                }catch (Exception e){
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
+
+        final TextView timeTextView = (TextView) findViewById(R.id.dailyGoalTextField);
+        timeTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TextView timeTextView = (TextView) findViewById(R.id.dailyGoalTextField);
                 String tempGoal = timeTextView.getText().toString();
                 try{
                     int goal = Integer.parseInt(tempGoal);
@@ -192,19 +209,24 @@ public class NavActivity extends AppCompatActivity
         int id = item.getItemId();
         Fragment fragment = null;
 
+
        switch (id){
            case R.id.nav_my_diet:
-               fragment = new MyDietScreen();
+               fragment = new FoodList();
                break;
+
            case R.id.nav_steps:
                fragment = new Steps();
                break;
-           case R.id.nav_food:
-               fragment = new FoodList();
+
+           case R.id.nav_tracker:
+               fragment = new CalorieTrackerScreen();
                break;
+
            case R.id.nav_report:
                fragment = new ReportScreen();
                break;
+
            case R.id.nav_map:
                Intent intentDash = new Intent(NavActivity.this, MapsActivity.class);
                Bundle bundle = new Bundle();
@@ -213,6 +235,8 @@ public class NavActivity extends AppCompatActivity
                intentDash.putExtras(bundle);
                startActivity(intentDash);
                break;
+
+
        }
 
         if(fragment != null) {
