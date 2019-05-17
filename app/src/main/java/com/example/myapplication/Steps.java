@@ -21,6 +21,10 @@ import com.google.gson.JsonObject;
 
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -173,7 +177,8 @@ try {
 
     //todo
     class insertToDB extends AsyncTask<Integer, Void, Void>{
-        private static final String BASE_URL =  "http://10.0.2.2:8080/assgn/webresources/restws.report/";
+        private static final String BASE_URL =  "http://10.0.2.2:8080/assgn/webresources/restws.report/savedb";
+
         @Override
         protected Void doInBackground(Integer... param) {
             DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -182,7 +187,7 @@ try {
            // JsonObject jsonObject = new JsonObject();
             JSONObject jsonObject= new JSONObject();
            try {
-               jsonObject.put("REPORT_ID", "5");
+               jsonObject.put("REPORT_ID", "1");
                jsonObject.put("USER_ID", "1");
                jsonObject.put("REPORT_DATE", "2019-05-15");
                jsonObject.put("TOTAL_CALORIES_CONSUMED", "11");
@@ -194,14 +199,6 @@ try {
                e.printStackTrace();
            }
 
-//            jsonObject.addProperty("REPORT_ID", "1");
-//            jsonObject.addProperty("USER_ID", "1");
-//            jsonObject.addProperty("REPORT_DATE", "2019-05-15");
-//            jsonObject.addProperty("TOTAL_CALORIES_CONSUMED","11");
-//            jsonObject.addProperty("TOTAL_CALORIES_CONSUMED","11");
-//            jsonObject.addProperty("TOTAL_CALORIES_BURN","112");
-//            jsonObject.addProperty("TOTAL_STEPS","122");
-//            jsonObject.addProperty("CALORIE_GOAL","500");
             HttpURLConnection connection = null;
             URL link = null;
             try{
@@ -211,14 +208,22 @@ try {
                 connection.setConnectTimeout(15000);
                 connection.setRequestMethod("POST");
                 connection.setDoOutput(true);
-                connection.setFixedLengthStreamingMode(jsonObject.length());
+                connection.setFixedLengthStreamingMode(jsonObject.toString().length());
 
                 connection.setRequestProperty("Content-Type", "application/json");
 
 
-                PrintWriter out= new PrintWriter(connection.getOutputStream());
-                out.print(jsonObject.toString());
-                out.close();
+//                PrintWriter out= new PrintWriter(connection.getOutputStream());
+//                out.print(jsonObject.toString());
+                OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+                writer.write(jsonObject.toString());
+                writer.flush();
+                writer.close();
+
+                InputStream inputStream = connection.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+//                out.close();
                // Log.i("error",new Integer(connection.getResponseCode()).toString());
             }catch (Exception e){
                 e.printStackTrace();
