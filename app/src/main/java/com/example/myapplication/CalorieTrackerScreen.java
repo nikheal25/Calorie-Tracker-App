@@ -1,12 +1,13 @@
 package com.example.myapplication;
 
-import android.content.Context;
+import android.app.Fragment;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 
 /**
@@ -20,7 +21,7 @@ import android.view.ViewGroup;
 public class CalorieTrackerScreen extends Fragment {
 
     private OnFragmentInteractionListener mListener;
-
+    private int goal, steps, consumedCals, burnedCals;
 
 
     @Override
@@ -34,26 +35,28 @@ public class CalorieTrackerScreen extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_calorie_tracker_screen, container, false);
+        view.setBackgroundColor(Color.WHITE);
+        try {
+            ((TextView) view.findViewById(R.id.goalTrackerScreen)).setText(Integer.toString(getArguments().getInt("Goal")));
+            //((TextView) view.findViewById(R.id.goalTrackerScreen)).setText(getArguments().getInt("Goal"));
+            ((TextView) view.findViewById(R.id.stepsTrackerScreen)).setText(Integer.toString(getArguments().getInt("Steps")));
+            ((TextView) view.findViewById(R.id.burnedTrackerScreen)).setText(Integer.toString(getArguments().getInt("BurnedCalories")));
+            ((TextView) view.findViewById(R.id.consumedTrackerScreen)).setText(Integer.toString(getArguments().getInt("ConsumedCalories")));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
+
+//    // TODO: Rename method, update argument and hook method into UI event
+//    public void onButtonPressed(Uri uri) {
+//        if (mListener != null) {
+//            mListener.onFragmentInteraction(uri);
+//        }
+//    }
+
 
     @Override
     public void onDetach() {

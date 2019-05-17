@@ -27,6 +27,11 @@ public class NavActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, Steps.OnFragmentInteractionListener {
 
     private String userId, userAddress, userPostcode;
+    private int globalGoal, stepsGlobal;
+
+    public void setStepsGlobal(int stepsGlobal) {
+        this.stepsGlobal = stepsGlobal;
+    }
 
     public String getUserId() {
         return userId;
@@ -43,14 +48,6 @@ public class NavActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -61,7 +58,6 @@ public class NavActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //
         setTitle("Calorie Tracker");
         String name = "User";
         TextView userName = findViewById(R.id.textView2);
@@ -95,25 +91,8 @@ public class NavActivity extends AppCompatActivity
         sharedPreferences = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
         int goalOfTheDay = getGoalOfTheDay(date.toString());
         displayGoalOfTheDay(goalOfTheDay);
+        this.globalGoal = goalOfTheDay;
 
-        //TODO to delete these lines
-        //update the goal
-//        Button updateGoal = (Button) findViewById(R.id.updateGoal);
-//        updateGoal.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                TextView timeTextView = (TextView) findViewById(R.id.dailyGoalTextField);
-//                String tempGoal = timeTextView.getText().toString();
-//                try{
-//                    int goal = Integer.parseInt(tempGoal);
-//                    if(goal > 0){
-//                        updateGoalOfTheDay(goal);
-//                    }
-//                }catch (Exception e){
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
 
         final TextView timeTextView = (TextView) findViewById(R.id.dailyGoalTextField);
         timeTextView.setOnClickListener(new View.OnClickListener() {
@@ -217,7 +196,25 @@ public class NavActivity extends AppCompatActivity
                break;
 
            case R.id.nav_tracker:
+               Bundle bundle1 = new Bundle();
+               bundle1.putInt("Steps", this.stepsGlobal);
+               bundle1.putInt("Goal", this.globalGoal);
+                //
+               int[] result = {0,0,0};
+               try {
+                   SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
+                   String subQuery = "remainingCalories/";
+                   String idAndDate = this.userId + "/" + dateFormat.format(Calendar.getInstance().getTime());
+                   result = new ReportQuery().execute(subQuery + idAndDate).get();
+               }catch (Exception e){
+                   e.printStackTrace();
+               }
+
+               bundle1.putInt("ConsumedCalories",result[0]);
+               bundle1.putInt("BurnedCalories", result[1]);
+
                fragment = new CalorieTrackerScreen();
+               fragment.setArguments(bundle1);
                break;
 
            case R.id.nav_report:

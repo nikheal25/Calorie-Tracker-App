@@ -4,8 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
@@ -53,6 +51,7 @@ public class GoogleAPI extends AsyncTask<Object, Void, ArrayList<Object>> {
                 String info = "";
                 try{
                     info = parser.parse(textResult).getAsJsonObject().get("items").getAsJsonArray().get(0).getAsJsonObject().get("snippet").getAsString();
+                    info = info.replace("...","");
                 }catch (Exception e){
                     e.printStackTrace();
                 }

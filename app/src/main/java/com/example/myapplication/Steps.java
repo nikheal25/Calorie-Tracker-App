@@ -103,7 +103,7 @@ try {
 }catch (Exception e){
     e.printStackTrace();
 }
-
+        ((NavActivity)getActivity()).setStepsGlobal(totalSteps);
         int[] dataCell = new int[] {R.id.stepsTime,R.id.stepsCount};
         myListAdapter =  new SimpleAdapter(this.getActivity(),listViewArray,R.layout.list_view,colHEAD,dataCell);
         stepsListView.setAdapter(myListAdapter);
