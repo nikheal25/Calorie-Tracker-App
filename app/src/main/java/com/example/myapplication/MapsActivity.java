@@ -94,7 +94,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.addMarker(new MarkerOptions().position(homeLocation).title("Home"));
 
-        for (int i =0 ; i< parks.size() && i<10;i++) // We show maximum 10 parks
+        for (int i =0 ; i< parks.size();i++)
             displayParks(parks.get(i));
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(homeLocation, 10));
@@ -107,7 +107,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void displayParks(LocationDetails park){
         try {
-            mMap.addMarker(new MarkerOptions().position(new LatLng(park.getLatitude(), park.getLogitude())).title(park.getName()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+            mMap.addMarker(new MarkerOptions().position(new LatLng(park.getLatitude(), park.getLogitude())).title(park.getName()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)).snippet(park.getDetails()).draggable(true));
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -158,10 +158,12 @@ class ParkFinder extends AsyncTask<Object, Void, ArrayList<LocationDetails>> {
                     float logitude1 = jsonObject.get("geometry").getAsJsonObject().get("location").getAsJsonObject().get("lng").getAsFloat();
 
                         String name = jsonObject.get("name").getAsString();
+                        String vicinity = jsonObject.get("vicinity").getAsString();
+                        String rating = jsonObject.get("rating").getAsString();
                         String openNow = "closed";
                         if (jsonObject.get("opening_hours").getAsJsonObject().get("open_now").getAsString().equalsIgnoreCase("true"))
                             openNow = "Open";
-                        locations.add(new LocationDetails(name, openNow, latitude1, logitude1));
+                        locations.add(new LocationDetails(name, openNow, vicinity, rating, latitude1, logitude1));
                     }catch (Exception e){
                         e.printStackTrace();
                     }
@@ -188,14 +190,29 @@ class ParkFinder extends AsyncTask<Object, Void, ArrayList<LocationDetails>> {
 class LocationDetails{
 
 
-    private String name, open;
+    private String name, open, vicinity, rating;
     private float latitude, logitude;
 
-    public LocationDetails(String name, String open, float latitude, float logitude) {
+
+    public LocationDetails(String name, String open, String vicinity, String rating, float latitude, float logitude) {
         this.name = name;
         this.open = open;
+        this.vicinity = vicinity;
+        this.rating = rating;
         this.latitude = latitude;
         this.logitude = logitude;
+    }
+
+    public String getVicinity() {
+        return vicinity;
+    }
+
+    public String getRating() {
+        return rating;
+    }
+
+    public String getDetails(){
+        return this.vicinity +System.getProperty("line.separator") + this.rating +System.getProperty("line.separator") + this.open;
     }
 
     public String getName() {

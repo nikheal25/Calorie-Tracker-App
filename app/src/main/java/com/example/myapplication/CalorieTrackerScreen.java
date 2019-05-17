@@ -36,6 +36,7 @@ public class CalorieTrackerScreen extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_calorie_tracker_screen, container, false);
         view.setBackgroundColor(Color.WHITE);
+        getActivity().setTitle("Calorie Tracker Screen");
         try {
             ((TextView) view.findViewById(R.id.goalTrackerScreen)).setText(Integer.toString(getArguments().getInt("Goal")));
             //((TextView) view.findViewById(R.id.goalTrackerScreen)).setText(getArguments().getInt("Goal"));

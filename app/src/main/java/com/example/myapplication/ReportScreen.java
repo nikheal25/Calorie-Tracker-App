@@ -136,7 +136,7 @@ public class ReportScreen extends Fragment {
         ArrayList xVals = new ArrayList();
 
         xVals.add(this.barDate1);
-        //TODO to confirm is it right?
+
 
         ArrayList yVals1 = new ArrayList();
         ArrayList yVals2 = new ArrayList();
@@ -263,9 +263,9 @@ public class ReportScreen extends Fragment {
 
         //TODO remove the lines below
         pieData = new ArrayList<>();
-        pieData.add(new SliceValue(30, Color.parseColor("#003f5c")).setLabel("Calories Consumed "));
-        pieData.add(new SliceValue(30, Color.parseColor("#7a5195")).setLabel("Calories Burned "));
-        pieData.add(new SliceValue(30, Color.parseColor("#ffa600")).setLabel("Remaining Calories "));
+//        pieData.add(new SliceValue(30, Color.parseColor("#003f5c")).setLabel("Calories Consumed "));
+//        pieData.add(new SliceValue(30, Color.parseColor("#7a5195")).setLabel("Calories Burned "));
+//        pieData.add(new SliceValue(30, Color.parseColor("#ffa600")).setLabel("Remaining Calories "));
 
 
         pieChartData = new PieChartData(pieData);
@@ -322,7 +322,7 @@ public class ReportScreen extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getActivity().setTitle("Food Items");
+        getActivity().setTitle("Report Screen");
     }
 
     /**
