@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 
@@ -27,6 +29,12 @@ public class MainActivity extends AppCompatActivity {
         logInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                try {
+                    InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 EditText email = (EditText) findViewById(R.id.emailField);
                 EditText password = (EditText) findViewById(R.id.passwordField);
                 URL appUser;
@@ -43,7 +51,9 @@ public class MainActivity extends AppCompatActivity {
                 password.setText("");
                 if( jsonObject == null){
                     TextView errorText = findViewById(R.id.errorField);
-                    errorText.setText("Wrong credentials");
+//                    errorText.setText("Wrong credentials");
+                    Toast.makeText(getApplicationContext(),"Wrong Credentials please try again", Toast.LENGTH_SHORT).show();
+
                 }else{
                     JsonObject appUserDetails = jsonObject.getAsJsonObject().get("appuser").getAsJsonObject();
 

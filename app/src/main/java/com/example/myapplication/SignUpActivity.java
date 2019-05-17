@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class SignUpActivity extends AppCompatActivity {
     private EditText dateText, heightText, weightText, firstnameText, lastnameText, emailText, addressText, postcodeText, usenameText, passwordText, stepsPerMile;
@@ -193,6 +194,7 @@ public class SignUpActivity extends AppCompatActivity {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
+            appuser.setUserId(new Random(1000).nextInt());
             appuser.setUserHeight((short) Integer.parseInt(temp.get(4)));
             appuser.setUserWeight((short) Integer.parseInt(temp.get(5)));
             appuser.setUserAddress(temp.get(6));
@@ -217,9 +219,6 @@ public class SignUpActivity extends AppCompatActivity {
 
                 connection.setRequestProperty("Content-Type", "application/json");
 
-
-//                PrintWriter out= new PrintWriter(connection.getOutputStream());
-//                out.print(jsonObject.toString());
                 OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
                 writer.write(userDetails);
                 writer.flush();
@@ -228,8 +227,6 @@ public class SignUpActivity extends AppCompatActivity {
                 InputStream inputStream = connection.getInputStream();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-//                out.close();
-                // Log.i("error",new Integer(connection.getResponseCode()).toString());
             }catch (Exception e){
                 e.printStackTrace();
             }finally {

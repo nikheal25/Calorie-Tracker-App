@@ -20,17 +20,26 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Random;
 import java.util.Scanner;
 
 ;
@@ -144,6 +153,8 @@ public class FoodList extends Fragment implements View.OnClickListener{
                     foodUnit.setText(resultSet.get(3));
                     foodAmount.setText(resultSet.get(4));
                     foodfat.setText(resultSet.get(5));
+                    //
+                    new AddFood().execute(resultSet);
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -295,7 +306,58 @@ class NDBAccess extends AsyncTask<String,Void, ArrayList<String>> {
 
 }
 
-class FoodTableQuery extends AsyncTask<Void,Void, ArrayList<Food>> {
+class AddFood extends AsyncTask<ArrayList<String>, Void, Void>{
+    private static final String BASE_URL =  "http://10.0.2.2:8080/assgn/webresources/restws.food/";
+
+
+    @Override
+    protected Void doInBackground(ArrayList<String>... arrayLists) {
+
+        ArrayList<String> temp = arrayLists[0];
+
+        Food food = new Food();
+        try {
+            food.setFoodName(temp.get(0));
+            food.setFoodId(Integer.parseInt(temp.get(1)));
+            food.setCalorieAmount(Integer.parseInt(temp.get(2)));
+            food.setServingunit(temp.get(3));
+            food.setCalorieAmount(Double.parseDouble(temp.get(4)));
+            food.setFat(Integer.parseInt(temp.get(5)));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        //
+
+        Gson gson =new Gson();
+        String userDetails=gson.toJson(food);
+        HttpURLConnection connection = null;
+        URL link = null;
+        try{
+            link = new URL(BASE_URL );
+            connection =  (HttpURLConnection) link.openConnection();
+            connection.setReadTimeout(10000);
+            connection.setConnectTimeout(15000);
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setFixedLengthStreamingMode(userDetails.getBytes().length);
+
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+            writer.write(userDetails);
+            writer.flush();
+            writer.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            connection.disconnect();
+        }
+        return null;
+    }
+}
+
+
+class  FoodTableQuery extends AsyncTask<Void,Void, ArrayList<Food>> {
     private static final String BASE_URL = "http://10.0.2.2:8080/assgn/webresources/restws.food/findAll/";
 
     @Override
