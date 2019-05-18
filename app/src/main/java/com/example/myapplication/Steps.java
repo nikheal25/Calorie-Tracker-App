@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 
 /**
@@ -58,7 +59,6 @@ public class Steps extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         getActivity().setTitle("Steps Taken");
     }
     @Override
@@ -125,7 +125,7 @@ try {
             @Override
             public void onClick(View v) {
                 try{
-                 new insertToDB().execute(totalSteps);
+                 new insertToDB().execute(((NavActivity)getActivity()).getStepsGlobal(), ((NavActivity)getActivity()).getGlobalGoal(), ((NavActivity)getActivity()).getTotalCaloriesBurned(), ((NavActivity)getActivity()).getTotalCaloriesConsumed());
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -170,68 +170,101 @@ try {
             }
             if ((steps.isEmpty() || steps == null) )
                 return null;
-            return (ArrayList<Stepstaken>) steps;
-        }
+            return (ArrayList<Stepstaken>) steps;        }
 
     }
 
-    //todo
-    class insertToDB extends AsyncTask<Integer, Void, Void>{
-        private static final String BASE_URL =  "http://10.0.2.2:8080/assgn/webresources/restws.report/savedb";
 
-        @Override
-        protected Void doInBackground(Integer... param) {
-            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-            Date date = new Date();
+}
 
-           // JsonObject jsonObject = new JsonObject();
-            JSONObject jsonObject= new JSONObject();
-           try {
-               jsonObject.put("REPORT_ID", "1");
-               jsonObject.put("USER_ID", "1");
-               jsonObject.put("REPORT_DATE", "2019-05-15");
-               jsonObject.put("TOTAL_CALORIES_CONSUMED", "11");
-               jsonObject.put("TOTAL_CALORIES_CONSUMED", "11");
-               jsonObject.put("TOTAL_CALORIES_BURN", "112");
-               jsonObject.put("TOTAL_STEPS", "122");
-               jsonObject.put("CALORIE_GOAL", "500");
-           }catch (Exception e){
-               e.printStackTrace();
-           }
+class insertToDB extends AsyncTask<Integer, Void, Void>{
+    private static final String BASE_URL =  "http://10.0.2.2:8080/assgn/webresources/restws.report/savedb";
 
-            HttpURLConnection connection = null;
-            URL link = null;
-            try{
-                link = new URL(BASE_URL );
-                connection =  (HttpURLConnection) link.openConnection();
-                connection.setReadTimeout(10000);
-                connection.setConnectTimeout(15000);
-                connection.setRequestMethod("POST");
-                connection.setDoOutput(true);
-                connection.setFixedLengthStreamingMode(jsonObject.toString().length());
+    @Override
+    protected Void doInBackground(Integer... param) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new Date();
 
-                connection.setRequestProperty("Content-Type", "application/json");
-
-
-//                PrintWriter out= new PrintWriter(connection.getOutputStream());
-//                out.print(jsonObject.toString());
-                OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
-                writer.write(jsonObject.toString());
-                writer.flush();
-                writer.close();
-
-                InputStream inputStream = connection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-//                out.close();
-               // Log.i("error",new Integer(connection.getResponseCode()).toString());
-            }catch (Exception e){
-                e.printStackTrace();
-            }finally {
-                connection.disconnect();
-            }
-            return null;
+        // JsonObject jsonObject = new JsonObject();
+        Report report = new Report();
+        try {
+            report.setReportId(new Random().nextInt());
+            report.setTotalSteps(param[0]);
+            report.setCalorieGoal(param[1]);
+            report.setReportDate(dateFormat.parse(String.valueOf(date.getTime())));
+            report.setTotalCaloriesBurn(param[2]);
+            report.setCalorieConsumed(param[3]);
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
+        Gson gson =new Gson();
+        String reportString=gson.toJson(report);
+
+        HttpURLConnection connection = null;
+        URL link = null;
+        try{
+            link = new URL(BASE_URL );
+            connection =  (HttpURLConnection) link.openConnection();
+            connection.setReadTimeout(10000);
+            connection.setConnectTimeout(15000);
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setFixedLengthStreamingMode(reportString.getBytes().length);
+
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream());
+            writer.write(reportString);
+            writer.flush();
+            writer.close();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            connection.disconnect();
+        }
+        return null;
     }
 }
 
+class Report{
+    private Integer reportId;
+
+    private Date reportDate;
+
+    private int totalCaloriesBurn;
+
+    private int totalSteps;
+
+    private int calorieGoal;
+
+    private int calorieConsumed;
+
+    public Report() {
+    }
+
+    public void setCalorieConsumed(int calorieConsumed) {
+        this.calorieConsumed = calorieConsumed;
+    }
+
+    public void setReportId(Integer reportId) {
+        this.reportId = reportId;
+    }
+
+    public void setReportDate(Date reportDate) {
+        this.reportDate = reportDate;
+    }
+
+    public void setTotalCaloriesBurn(int totalCaloriesBurn) {
+        this.totalCaloriesBurn = totalCaloriesBurn;
+    }
+
+    public void setTotalSteps(int totalSteps) {
+        this.totalSteps = totalSteps;
+    }
+
+    public void setCalorieGoal(int calorieGoal) {
+        this.calorieGoal = calorieGoal;
+    }
+}

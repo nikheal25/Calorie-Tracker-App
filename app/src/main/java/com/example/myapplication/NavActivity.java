@@ -1,7 +1,10 @@
 package com.example.myapplication;
 
+import android.app.AlarmManager;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,7 +30,43 @@ public class NavActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, Steps.OnFragmentInteractionListener {
 
     private String userId, userAddress, userPostcode;
-    private int globalGoal, stepsGlobal;
+    private int globalGoal, stepsGlobal, totalCaloriesBurned, totalCaloriesConsumed;
+
+    public int getTotalCaloriesBurned() {
+        return totalCaloriesBurned;
+    }
+
+    public int getTotalCaloriesConsumed() {
+        return totalCaloriesConsumed;
+    }
+
+    public void setTotalCaloriesBurned(int totalCaloriesBurned) {
+        this.totalCaloriesBurned = totalCaloriesBurned;
+    }
+
+    public void setTotalCaloriesConsumed(int totalCaloriesConsumed) {
+        this.totalCaloriesConsumed = totalCaloriesConsumed;
+    }
+
+    public String getUserAddress() {
+        return userAddress;
+    }
+
+    public String getUserPostcode() {
+        return userPostcode;
+    }
+
+    public int getGlobalGoal() {
+        return globalGoal;
+    }
+
+    public int getStepsGlobal() {
+        return stepsGlobal;
+    }
+
+    public SharedPreferences getSharedPreferences() {
+        return sharedPreferences;
+    }
 
     public void setStepsGlobal(int stepsGlobal) {
         this.stepsGlobal = stepsGlobal;
@@ -57,6 +96,31 @@ public class NavActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        try {
+            Calendar cur_cal = Calendar.getInstance();
+            cur_cal.setTimeInMillis(System.currentTimeMillis());
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, cur_cal.get(Calendar.DAY_OF_YEAR));
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            cal.set(Calendar.SECOND, cur_cal.get(Calendar.SECOND));
+            cal.set(Calendar.MILLISECOND, cur_cal.get(Calendar.MILLISECOND));
+            cal.set(Calendar.DATE, cur_cal.get(Calendar.DATE));
+            cal.set(Calendar.MONTH, cur_cal.get(Calendar.MONTH));
+            Intent intent1 = new Intent(NavActivity.this, AlarmReceiver.class);
+            PendingIntent pintent = PendingIntent.getService(NavActivity.this, 0, intent1, 0);
+            intent1.putExtra("step", this.getStepsGlobal());
+            intent1.putExtra("goal", this.getGlobalGoal());
+            intent1.putExtra("consumed", this.getTotalCaloriesConsumed());
+            intent1.putExtra("burned", this.getTotalCaloriesBurned());
+
+            AlarmManager alarm = (AlarmManager) NavActivity.this.getSystemService(Context.ALARM_SERVICE);
+            alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 30 * 1000, pintent);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
 
         setTitle("Calorie Tracker");
         String name = "User";
@@ -209,7 +273,8 @@ public class NavActivity extends AppCompatActivity
                }catch (Exception e){
                    e.printStackTrace();
                }
-
+               this.setTotalCaloriesConsumed(result[0]);
+               this.setTotalCaloriesBurned(result[1]);
                bundle1.putInt("ConsumedCalories",result[0]);
                bundle1.putInt("BurnedCalories", result[1]);
 
@@ -241,5 +306,18 @@ public class NavActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+    class AlarmReceiver extends IntentService {
+        public AlarmReceiver(String name) {
+            super(name);
+        }
+
+        protected void onHandleIntent(Intent workIntent) {
+            try{
+                new insertToDB().execute(workIntent.getIntExtra("step", 0), workIntent.getIntExtra("goal", 0), workIntent.getIntExtra("burned", 0), workIntent.getIntExtra("consumed", 0));
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
     }
 }
