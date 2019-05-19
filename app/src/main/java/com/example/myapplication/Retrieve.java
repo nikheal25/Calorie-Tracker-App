@@ -22,7 +22,8 @@ public class Retrieve extends AsyncTask<Object, Void, JsonObject> {
         JsonObject returnValue= null;
         URL credential;
         String userName = objects[0].toString();
-        String passwordTyped = objects[1].toString();
+        //Converts the string to hash
+        String passwordTyped = Integer.toString(objects[1].toString().hashCode());
         String textResult = "";
         HttpURLConnection connection = null;
 
