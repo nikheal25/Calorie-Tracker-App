@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,20 +14,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.spec.ECField;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -126,8 +118,16 @@ try {
             public void onClick(View v) {
                 try{
                  new insertToDB().execute(((NavActivity)getActivity()).getStepsGlobal(), ((NavActivity)getActivity()).getGlobalGoal(), ((NavActivity)getActivity()).getTotalCaloriesBurned(), ((NavActivity)getActivity()).getTotalCaloriesConsumed());
+
                 }catch (Exception e){
                     e.printStackTrace();
+                }
+                try{
+                    new DeleteDatabase().execute();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }finally {
+                    listOfSteps = new ArrayList<>();
                 }
             }
         });
@@ -172,6 +172,14 @@ try {
                 return null;
             return (ArrayList<Stepstaken>) steps;        }
 
+    }
+
+    private class DeleteDatabase extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            stepsDB.stepsTakenDao().deleteAll();
+            return null;
+        }
     }
 
 
