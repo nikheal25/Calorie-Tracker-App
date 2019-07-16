@@ -16,7 +16,7 @@ import java.util.Scanner;
 
 public class GoogleAPI extends AsyncTask<Object, Void, ArrayList<Object>> {
     private static final String BASE_URL = "https://www.googleapis.com/customsearch/v1?q=";
-    private static  final String END_URL = "&key=AIzaSyCz7hedipv9239FSw-iCRASvI2YJdQv6zY&cx=010467756717823719751:poky0bgprqa&alt=json";
+    private static  final String END_URL = "--------PUT YOUR KEY HERE------------";
 
     @Override
     protected ArrayList<Object> doInBackground(Object[] objects) {
